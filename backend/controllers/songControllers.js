@@ -10,9 +10,15 @@ export const createAlbum = TryCatch(async (req, res) => {
   //     message: "You are not admin",
   //   });
 
-  const { title, description } = req.body;
+  const { title, description ,privacy} = req.body;
 
   const file = req.file;
+
+  if (!title || !description || !file || !privacy) {
+    return res.status(400).json({
+      message: "Title, description, file, and privacy are required.",
+    });
+  }
 
   const fileUrl = getDataurl(file);
 
@@ -25,6 +31,8 @@ export const createAlbum = TryCatch(async (req, res) => {
       id: cloud.public_id,
       url: cloud.secure_url,
     },
+    privacy, // Save the privacy setting
+
   });
 
   res.json({
@@ -121,6 +129,5 @@ export const deleteSong = TryCatch(async (req, res) => {
 
 export const getSingleSong = TryCatch(async (req, res) => {
   const song = await Song.findById(req.params.id);
-
   res.json(song);
 });

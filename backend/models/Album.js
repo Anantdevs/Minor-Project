@@ -14,6 +14,7 @@ const schema = new mongoose.Schema(
       id: String,
       url: String,
     },
+    privacy: { type: String, enum: ['public', 'member'], default: 'public' }, 
   },
   {
     timestamps: true,

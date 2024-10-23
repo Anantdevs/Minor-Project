@@ -19,6 +19,8 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={isAuth ? <Home /> : <Login />} />
+            {/* <Route path="/" element={ <Admin /> } /> */}
+
             <Route
               path="/playlist"
               element={isAuth ? <PlayList user={user} /> : <Login />}

@@ -16,7 +16,6 @@ const Admin = () => {
     deleteSong,
   } = SongData();
   const navigate = useNavigate();
-
   if (user && user.role !== "admin") return navigate("/");
 
   const [title, setTitle] = useState("");
@@ -24,6 +23,7 @@ const Admin = () => {
   const [file, setFile] = useState(null);
   const [singer, setSinger] = useState("");
   const [album, setAlbum] = useState("");
+  const [privacy, setPrivacy] = useState("public"); // New state for privacy
 
   const fileChangeHandler = (e) => {
     const file = e.target.files[0];
@@ -34,18 +34,17 @@ const Admin = () => {
     e.preventDefault();
 
     const formData = new FormData();
-
     formData.append("title", title);
     formData.append("description", description);
     formData.append("file", file);
-    addAlbum(formData, setTitle, setDescription, setFile);
+    formData.append("privacy", privacy); // Append privacy option to form data
+    addAlbum(formData, setTitle, setDescription, setFile, setPrivacy);
   };
 
   const addSongHandler = (e) => {
     e.preventDefault();
 
     const formData = new FormData();
-
     formData.append("title", title);
     formData.append("description", description);
     formData.append("singer", singer);
@@ -62,24 +61,19 @@ const Admin = () => {
   };
 
   const deleteHandler = (id) => {
-    if (confirm("are you sure you want to delete this song")) {
+    if (confirm("Are you sure you want to delete this song?")) {
       deleteSong(id);
     }
   };
+
   return (
     <div className="min-h-screen bg-[#212121] text-white p-8">
-      <Link
-        to="/"
-        className="bg-green-500 text-white font-bold py-2 px-4 rounded-full"
-      >
+      <Link to="/" className="bg-green-500 text-white font-bold py-2 px-4 rounded-full">
         Go to home page
       </Link>
       <h2 className="text-2xl font-bold mb-6 mt-6">Add Album</h2>
 
-      <form
-        onSubmit={addAlbumHandler}
-        className="bg-[#181818] p-6 rounded-lg shadow-lg"
-      >
+      <form onSubmit={addAlbumHandler} className="bg-[#181818] p-6 rounded-lg shadow-lg">
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Title</label>
           <input
@@ -92,17 +86,16 @@ const Admin = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Descripiton</label>
+          <label className="block text-sm font-medium mb-1">Description</label>
           <input
             type="text"
-            placeholder="Descripiton"
+            placeholder="Description"
             className="auth-input"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             required
           />
         </div>
-
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Thumbnail</label>
           <input
@@ -112,6 +105,31 @@ const Admin = () => {
             onChange={fileChangeHandler}
             required
           />
+        </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Privacy Settings</label>
+          <div className="flex items-center">
+            <label className="mr-4">
+              <input
+                type="radio"
+                value="public"
+                checked={privacy === "public"}
+                onChange={() => setPrivacy("public")}
+                className="mr-1"
+              />
+              Public for everyone
+            </label>
+            <label>
+              <input
+                type="radio"
+                value="member"
+                checked={privacy === "member"}
+                onChange={() => setPrivacy("member")}
+                className="mr-1"
+              />
+              Member only
+            </label>
+          </div>
         </div>
 
         <button
@@ -125,10 +143,7 @@ const Admin = () => {
 
       <h2 className="text-2xl font-bold mb-6 mt-6">Add Songs</h2>
 
-      <form
-        onSubmit={addSongHandler}
-        className="bg-[#181818] p-6 rounded-lg shadow-lg"
-      >
+      <form onSubmit={addSongHandler} className="bg-[#181818] p-6 rounded-lg shadow-lg">
         <div className="mb-4">
           <label className="block text-sm font-medium mb-1">Title</label>
           <input
@@ -141,10 +156,10 @@ const Admin = () => {
           />
         </div>
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Descripiton</label>
+          <label className="block text-sm font-medium mb-1">Description</label>
           <input
             type="text"
-            placeholder="Descripiton"
+            placeholder="Description"
             className="auth-input"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -178,7 +193,7 @@ const Admin = () => {
         </select>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">audio</label>
+          <label className="block text-sm font-medium mb-1">Audio</label>
           <input
             type="file"
             className="auth-input"
