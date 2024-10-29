@@ -15,7 +15,6 @@ export const SongProvider = ({ children }) => {
   async function fetchSongs() {
     try {
       const { data } = await axios.get("/api/song/all");
-
       setSongs(data);
       setSelectedSong(data[0]._id);
       setIsPlaying(false);
@@ -92,17 +91,28 @@ export const SongProvider = ({ children }) => {
   }
 
   const [albums, setAlbums] = useState([]);
+  const [useralbums, setuserAlbums] = useState([]);
+
 
   async function fetchAlbums() {
     try {
       const { data } = await axios.get("/api/song/album/all");
-
       setAlbums(data);
     } catch (error) {
       console.log(error);
     }
   }
-
+  
+  async function getUserAlbums() {
+    try {
+      const { data } = await axios.get("/api/song/albums"); // Adjust the endpoint as needed
+      setuserAlbums(data);
+      // console.log(data);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
   async function deleteSong(id) {
     try {
       const { data } = await axios.delete("/api/song/" + id);
@@ -159,6 +169,7 @@ export const SongProvider = ({ children }) => {
         loading,
         songLoading,
         albums,
+        useralbums,
         addSong,
         addThumbnail,
         deleteSong,
@@ -175,6 +186,7 @@ export const SongProvider = ({ children }) => {
         albumData,
         fetchSongs,
         fetchAlbums,
+        getUserAlbums
       }}
     >
       {children}

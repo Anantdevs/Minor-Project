@@ -26,11 +26,14 @@ const port = process.env.PORT;
 //importing routes
 import userRoutes from "./routes/userRoutes.js";
 import songRoutes from "./routes/songRoutes.js";
-
+// import commentRoutes from "./routes/commentRoutes.js";
+import commentRoutes from "./routes/commentRoutes.js";
 
 //using routes
 app.use("/api/user", userRoutes);
 app.use("/api/song", songRoutes);
+app.use("/api/comment", commentRoutes);
+
 
 const __dirname = path.resolve();
 

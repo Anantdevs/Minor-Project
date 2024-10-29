@@ -19,6 +19,7 @@ const schema = new mongoose.Schema(
       type: String,
       default: "admin",
     },
+    
     playlist: [
       {
         type: String,

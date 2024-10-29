@@ -52,13 +52,13 @@ const PlayList = ({ user }) => {
           <h2 className="text-3xl font-bold mb-4 md:text-5xl">
             {user.name} PlayList
           </h2>
-          <h4>Your Favourate songs</h4>
+          <h4>Your Favourate Podcasts</h4>
           <p className="mt-1">
-            <img
+            {/* <img
               src={assets.spotify_logo}
               className="inline-block w-6"
               alt=""
-            />
+            /> */}
           </p>
         </div>
       </div>

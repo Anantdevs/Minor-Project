@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const Comment = ({ comment, onReply }) => {
   const [replyText, setReplyText] = useState("");
@@ -7,7 +7,7 @@ const Comment = ({ comment, onReply }) => {
   const handleReplySubmit = (e) => {
     e.preventDefault();
     if (replyText.trim()) {
-      onReply(comment.id, replyText);
+      onReply(comment._id, replyText); // Use comment._id instead of comment.id
       setReplyText("");
       setShowReplyBox(false);
     }
@@ -16,7 +16,7 @@ const Comment = ({ comment, onReply }) => {
   return (
     <div className="ml-4 mb-4">
       <div className="bg-gray-700 p-2 rounded text-white">
-        <p>{comment.text}</p>
+        <p>{comment.content}</p> {/* Updated to comment.content */}
         <button
           className="text-sm text-blue-400"
           onClick={() => setShowReplyBox(!showReplyBox)}
@@ -46,7 +46,7 @@ const Comment = ({ comment, onReply }) => {
       {comment.replies.length > 0 && (
         <div className="ml-4 mt-2">
           {comment.replies.map((reply) => (
-            <Comment key={reply.id} comment={reply} onReply={onReply} />
+            <Comment key={reply._id} comment={reply} onReply={onReply} /> 
           ))}
         </div>
       )}
@@ -54,49 +54,89 @@ const Comment = ({ comment, onReply }) => {
   );
 };
 
-const CommentSection = () => {
+const CommentSection = ({ songId }) => {
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState("");
 
-  const handleReply = (parentId, text) => {
-    const addReplyToComment = (commentsArray, parentId) => {
-      return commentsArray.map((comment) => {
-        if (comment.id === parentId) {
-          return {
-            ...comment,
-            replies: [
-              ...comment.replies,
-              {
-                id: new Date().getTime(),
-                text,
-                replies: [],
-              },
-            ],
-          };
-        } else {
-          return {
-            ...comment,
-            replies: addReplyToComment(comment.replies, parentId),
-          };
-        }
-      });
+  // Fetch comments when the component mounts
+  useEffect(() => {
+    const fetchComments = async () => {
+      try {
+        const response = await fetch(`/api/comment/song/${songId}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Assuming you use token-based auth
+          },
+        });
+        const data = await response.json();
+        setComments(data);
+      } catch (error) {
+        console.error("Error fetching comments:", error);
+      }
     };
 
-    setComments((prevComments) =>
-      parentId === null
-        ? [
-            ...prevComments,
-            { id: new Date().getTime(), text, replies: [] },
-          ]
-        : addReplyToComment(prevComments, parentId)
-    );
+    fetchComments();
+  }, [songId]);
+
+  const handleReply = async (parentId, text) => {
+    try {
+      const response = await fetch(`/api/comment/comment/${parentId}/reply`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`, // Include auth token
+        },
+        body: JSON.stringify({ content: text }),
+      });
+
+      const newReply = await response.json();
+      if (response.ok) {
+        setComments((prevComments) => {
+          const addReplyToComment = (commentsArray) => {
+            return commentsArray.map((comment) => {
+              if (comment._id === parentId) {
+                return {
+                  ...comment,
+                  replies: [...comment.replies, newReply], // Add the new reply
+                };
+              }
+              return {
+                ...comment,
+                replies: addReplyToComment(comment.replies),
+              };
+            });
+          };
+
+          return addReplyToComment(prevComments);
+        });
+      }
+    } catch (error) {
+      console.error("Error posting reply:", error);
+    }
   };
 
-  const handleCommentSubmit = (e) => {
+  const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (commentText.trim()) {
-      handleReply(null, commentText);
-      setCommentText("");
+      try {
+        const response = await fetch(`/api/comment/song/${songId}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`, // Include auth token
+          },
+          body: JSON.stringify({ content: commentText }),
+        });
+
+        const newComment = await response.json();
+        if (response.ok) {
+          setComments((prevComments) => [...prevComments, newComment]); // Add the new comment
+          setCommentText(""); // Clear the input field
+        }
+      } catch (error) {
+        console.error("Error posting comment:", error);
+      }
     }
   };
 
@@ -118,7 +158,8 @@ const CommentSection = () => {
       <div className="mt-4 overflow-x-auto">
         <div className="min-w-[300px] max-h-[160px] overflow-y-auto">
           {comments.map((comment) => (
-            <Comment key={comment.id} comment={comment} onReply={handleReply} />
+            <Comment key={comment._id} comment={comment} onReply={handleReply} /> 
+            /* Updated to comment._id */
           ))}
         </div>
       </div>

@@ -51,11 +51,11 @@ const Album = () => {
               </h2>
               <h4>{albumData.description}</h4>
               <p className="mt-1">
-                <img
+                {/* <img
                   src={assets.spotify_logo}
                   className="inline-block w-6"
                   alt=""
-                />
+                /> */}
               </p>
             </div>
           </div>

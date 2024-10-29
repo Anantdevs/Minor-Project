@@ -7,6 +7,7 @@ import { MdDelete } from "react-icons/md";
 const Admin = () => {
   const { user } = UserData();
   const {
+    useralbums,
     albums,
     songs,
     addAlbum,
@@ -43,7 +44,6 @@ const Admin = () => {
 
   const addSongHandler = (e) => {
     e.preventDefault();
-
     const formData = new FormData();
     formData.append("title", title);
     formData.append("description", description);
@@ -141,7 +141,7 @@ const Admin = () => {
         </button>
       </form>
 
-      <h2 className="text-2xl font-bold mb-6 mt-6">Add Songs</h2>
+      <h2 className="text-2xl font-bold mb-6 mt-6">Add Podcasts</h2>
 
       <form onSubmit={addSongHandler} className="bg-[#181818] p-6 rounded-lg shadow-lg">
         <div className="mb-4">
@@ -213,7 +213,7 @@ const Admin = () => {
       </form>
 
       <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-4">Added Songs</h3>
+        <h3 className="text-xl font-semibold mb-4">Added Podcasts</h3>
         <div className="flex justify-center md:justify-start gap-2 items-center flex-wrap">
           {songs &&
             songs.map((e, i) => (

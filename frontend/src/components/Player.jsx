@@ -2,8 +2,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { SongData } from "../context/Song";
 import { GrChapterNext, GrChapterPrevious } from "react-icons/gr";
 import { FaPause, FaPlay, FaExpand, FaCompress, FaHeart, FaDollarSign } from "react-icons/fa"; 
-import CommentSection from "./CommentSection";
+import CommentSection from "./commentSection";
 import TippingOptions from "./TippingOptions"; // Import the new TippingOptions component
+import { UserData } from "../context/User"; // Import UserData hook
 
 const Player = () => {
   const {
@@ -15,14 +16,26 @@ const Player = () => {
     nextMusic,
     prevMusic,
   } = SongData();
+  const { user } = UserData(); // Access the user from context
 
   useEffect(() => {
-    fetchSingleSong();
-  }, [selectedSong]);
+    const loadSong = async () => {
+      try {
+        await fetchSingleSong(); // Fetch the song
+      } catch (error) {
+        console.error("Failed to fetch the song:", error);
+      }
+    };
+  
+    loadSong();
+  }, [fetchSingleSong]);
+
+
 
   const audioRef = useRef(null);
 
   const handlePlayPause = () => {
+    console.log(song)
     if (isPlaying) {
       audioRef.current.pause();
     } else {
@@ -45,7 +58,20 @@ const Player = () => {
 
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(0);
+  useEffect(() => {
+  if (song) {
+    // Only reset progress if the song changes
+    setProgress((prev) => (prev === 0 ? prev : 0)); // Reset only if not already 0
 
+    // Check if likes array exists and then check if user has liked the song
+    if (song.likes) {
+      setIsLoved(song.likes.includes(user?._id));
+    }
+  }
+}, [song, user]);
+
+
+  
   useEffect(() => {
     const audio = audioRef.current;
 
@@ -77,10 +103,32 @@ const Player = () => {
   const toggleExpand = () => {
     setIsExpanded((prev) => !prev);
   };
-
-  const toggleLove = () => {
-    setIsLoved((prev) => !prev);
+  const toggleLove = async () => {
+    if (user) {
+      try {
+        const isLiked = isLoved; // Store the current like status
+  
+        const response = await fetch(`/api/song/${isLiked ? 'unlike' : 'like'}/${song._id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ userId: user._id }),
+        });
+  
+        if (!response.ok) {
+          throw new Error('Failed to update like status');
+        }
+  
+        const updatedSong = await response.json();
+        setIsLoved(!isLiked); // Toggle local state
+      } catch (error) {
+        console.error('Error toggling like status:', error);
+      }
+    }
   };
+
+  
 
   const toggleTip = (amount) => {
     setSelectedTip(amount);
@@ -97,7 +145,6 @@ const Player = () => {
       image: song.thumbnail ? song.thumbnail.url : "https://via.placeholder.com/150",
       handler: function (response) {
         alert("Payment successful: " + response.razorpay_payment_id);
-        // Handle success, e.g., send this payment ID to your server
       },
       prefill: {
         name: "Your Name",
@@ -165,7 +212,6 @@ const Player = () => {
                 </div>
               </div>
 
-              {/* Tipping Options */}
               <TippingOptions onSelect={toggleTip} />
 
               <div className="flex items-center gap-5 mt-2">
@@ -250,7 +296,7 @@ const Player = () => {
 
           {isExpanded && (
             <div className="relative mt-4">
-              {showComments && <CommentSection onClose={() => setShowComments(false)} />}
+              {showComments && <CommentSection songId={song._id} onClose={() => setShowComments(false)} />}
               <button
                 onClick={() => setShowComments((prev) => !prev)}
                 className="bg-blue-500 text-white rounded p-2 mb-2"

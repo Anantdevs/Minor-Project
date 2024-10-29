@@ -1,4 +1,3 @@
-// SearchSection.jsx
 import React, { useState } from "react";
 
 const SearchSection = ({ onSearch }) => {
@@ -16,7 +15,7 @@ const SearchSection = ({ onSearch }) => {
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         placeholder="Search..."
-        className="border rounded p-2 w-full md:w-64"
+        className="border rounded p-2 w-full md:w-64 bg-gray-800 text-white" // Added bg color for better visibility
       />
       <button type="submit" className="ml-2 bg-blue-500 text-white rounded p-2">
         Search

@@ -18,8 +18,8 @@ const App = () => {
       ) : (
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={isAuth ? <Home /> : <Login />} />
-            {/* <Route path="/" element={ <Admin /> } /> */}
+            {/* <Route path="/" element={isAuth ? <Home /> : <Login />} /> */}
+            <Route path="/" element={ <Home /> } />
 
             <Route
               path="/playlist"

@@ -14,7 +14,14 @@ const schema = new mongoose.Schema(
       id: String,
       url: String,
     },
-    privacy: { type: String, enum: ['public', 'member'], default: 'public' }, 
+    privacy: { type: String, enum: ['public', 'member'], default: 'public' },
+
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User", 
+      required: true,
+    }, 
+    
   },
   {
     timestamps: true,
