@@ -91,3 +91,31 @@ export const saveToPlaylist = TryCatch(async (req, res) => {
     message: "added to playlist",
   });
 });
+
+export const updateUpiId = async (req, res) => {
+  const { upi_id } = req.body;
+  try {
+    const user = await User.findById(req.user._id);
+    user.upi_id = upi_id; // Assuming your User model has a field for UPI ID
+    await user.save();
+    res.json({ message: "UPI ID updated successfully", upi_id: user.upi_id });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating UPI ID", error });
+  }
+};
+
+
+export const getUserById = TryCatch(async (req, res) => {
+  const { id } = req.params; 
+  try {
+    const user = await User.findById(id).select('-password'); 
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ message: 'Error fetching user data', error });
+  }
+});

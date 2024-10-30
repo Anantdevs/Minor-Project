@@ -5,6 +5,8 @@ import { FaPause, FaPlay, FaExpand, FaCompress, FaHeart, FaDollarSign } from "re
 import CommentSection from "./commentSection";
 import TippingOptions from "./TippingOptions"; // Import the new TippingOptions component
 import { UserData } from "../context/User"; // Import UserData hook
+// import qrCodeComponent from './QRCodeComponent'; 
+import { QRCodeCanvas } from 'qrcode.react'; 
 
 const Player = () => {
   const {
@@ -49,6 +51,55 @@ const Player = () => {
   const [showComments, setShowComments] = useState(false);
   const [isLoved, setIsLoved] = useState(false);
   const [selectedTip, setSelectedTip] = useState(null);
+
+  const [upiId, setUpiId] = useState('');
+  const [message, setMessage] = useState('');
+  const [amount, setAmount] = useState(0);
+  const [showQrCode, setShowQrCode] = useState(false);
+  const [enable,setEnable] = useState(false);
+  const generateUri = () => {
+    return `upi://pay?pa=${upiId}&pn=YourName&mc=1234&tid=transaction_id&am=${amount}&cu=INR&url=${message}`;
+  };
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (!song.userId) {
+        console.log('User ID is not defined');
+        return; // Early return if userId is not valid
+      }
+      
+      try {
+        const response = await fetch(`/api/user/${song.userId}`);
+        console.log("Working");
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const userData = await response.json();
+        if (userData.upi_id === 'upi_id') {
+          setEnable(false);
+          setMessage('This feature is not enabled by the creator at this moment.');
+        } else {
+          setEnable(true);
+          console.log(userData.upi_id)
+          setUpiId(userData.upi_id);
+          setMessage('This is is enabled by the creator at this moment.');
+        }
+      } catch (error) {
+        console.log('Error fetching user data:', error);
+      }
+    };
+  
+    fetchUserData();
+  }, [song.userId]);
+  
+
+  const generateQR = () => {
+    if (amount > 0 && upiId) {
+      setShowQrCode(true);
+    } else {
+      setMessage('Please enter a valid amount.');
+    }
+  };
+
 
   const handleVolumeChange = (e) => {
     const newVolume = e.target.value;
@@ -163,21 +214,14 @@ const Player = () => {
     });
   };
 
+
   return (
     <div>
       {song && (
-        <div
-          className={`${
-            isExpanded ? 'fixed top-0 left-0 w-full h-full bg-black' : 'h-[10%] bg-black'
-          } flex flex-col justify-between text-white px-4 transition-all duration-300`}
-        >
+        <div className={`${isExpanded ? 'fixed top-0 left-0 w-full h-full bg-black' : 'h-[10%] bg-black'} flex flex-col justify-between text-white px-4 transition-all duration-300`}>
           {isExpanded ? (
             <div className="flex flex-col items-center justify-center h-full">
-              <img
-                src={song.thumbnail ? song.thumbnail.url : "https://via.placeholder.com/150"}
-                className="w-36 mb-4"
-                alt=""
-              />
+              <img src={song.thumbnail ? song.thumbnail.url : "https://via.placeholder.com/150"} className="w-36 mb-4" alt="" />
               <div className="text-center mb-4">
                 <p className="text-lg font-semibold">{song.title}</p>
                 <p className="text-sm">{song.description && song.description.slice(0, 30)}...</p>
@@ -200,10 +244,7 @@ const Player = () => {
                   <span className="cursor-pointer" onClick={prevMusic}>
                     <GrChapterPrevious />
                   </span>
-                  <button
-                    className="bg-white text-black rounded-full p-2"
-                    onClick={handlePlayPause}
-                  >
+                  <button className="bg-white text-black rounded-full p-2" onClick={handlePlayPause}>
                     {isPlaying ? <FaPause /> : <FaPlay />}
                   </button>
                   <span className="cursor-pointer" onClick={nextMusic}>
@@ -214,7 +255,26 @@ const Player = () => {
 
               <TippingOptions onSelect={toggleTip} />
 
-              <div className="flex items-center gap-5 mt-2">
+              <div className="flex flex-col items-start mt-4">
+                {enable && (
+                  <>
+                    <p>UPI Scanner for Your Creator</p>
+                    <QRCodeCanvas value={generateUri()} className="mt-2" />
+                    <input
+                      type="number"
+                      placeholder="Enter Amount"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      className="border rounded px-2 w-full max-w-xs text-black mt-2"
+                    />
+                  </>
+                )}
+                {!enable && (
+                  <p className="mt-2">THIS FEATURE IS NOT ENABLED BY THE CREATOR</p>
+                )}
+              </div>
+
+              <div className="flex items-center gap-5 mt-4 mb-2">
                 <input
                   type="range"
                   className="w-16 md:w-32"
@@ -235,11 +295,7 @@ const Player = () => {
           ) : (
             <div className="flex justify-between items-center">
               <div className="lg:flex items-center gap-4">
-                <img
-                  src={song.thumbnail ? song.thumbnail.url : "https://via.placeholder.com/50"}
-                  className="w-12"
-                  alt=""
-                />
+                <img src={song.thumbnail ? song.thumbnail.url : "https://via.placeholder.com/50"} className="w-12" alt="" />
                 <div className="hidden md:block">
                   <p>{song.title}</p>
                   <p>{song.description && song.description.slice(0, 30)}...</p>
@@ -263,10 +319,7 @@ const Player = () => {
                   <span className="cursor-pointer" onClick={prevMusic}>
                     <GrChapterPrevious />
                   </span>
-                  <button
-                    className="bg-white text-black rounded-full p-2"
-                    onClick={handlePlayPause}
-                  >
+                  <button className="bg-white text-black rounded-full p-2" onClick={handlePlayPause}>
                     {isPlaying ? <FaPause /> : <FaPlay />}
                   </button>
                   <span className="cursor-pointer" onClick={nextMusic}>
@@ -297,10 +350,7 @@ const Player = () => {
           {isExpanded && (
             <div className="relative mt-4">
               {showComments && <CommentSection songId={song._id} onClose={() => setShowComments(false)} />}
-              <button
-                onClick={() => setShowComments((prev) => !prev)}
-                className="bg-blue-500 text-white rounded p-2 mb-2"
-              >
+              <button onClick={() => setShowComments((prev) => !prev)} className="bg-blue-500 text-white rounded p-2 mb-2">
                 {showComments ? "Hide Comments" : "Show Comments"}
               </button>
             </div>
@@ -310,5 +360,6 @@ const Player = () => {
     </div>
   );
 };
+
 
 export default Player;

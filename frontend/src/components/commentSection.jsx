@@ -156,10 +156,9 @@ const CommentSection = ({ songId }) => {
       </form>
 
       <div className="mt-4 overflow-x-auto">
-        <div className="min-w-[300px] max-h-[160px] overflow-y-auto">
+        <div className="min-w-[300px] max-h-[90px] overflow-y-auto">
           {comments.map((comment) => (
             <Comment key={comment._id} comment={comment} onReply={handleReply} /> 
-            /* Updated to comment._id */
           ))}
         </div>
       </div>

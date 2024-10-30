@@ -19,6 +19,10 @@ const schema = new mongoose.Schema(
       type: String,
       default: "admin",
     },
+    upi_id: {
+      type: String,
+      default: "upi_id",
+    },
     
     playlist: [
       {

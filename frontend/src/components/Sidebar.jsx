@@ -13,6 +13,7 @@ const Sidebar = () => {
   const [isSearchVisible, setIsSearchVisible] = useState(false);
   const [searchResults, setSearchResults] = useState([]); 
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const [upiId, setUpiId] = useState(user.upi_id); 
 
 
   const createdAt = new Date(user.createdAt);
@@ -27,6 +28,26 @@ const Sidebar = () => {
   const handleSearchToggle = () => {
     setIsSearchVisible((prev) => !prev);
   };
+
+  const updateUpiId = async () => {
+    try {
+        const response = await fetch('/api/user/update-upi-id', {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ upi_id: upiId }), 
+        });
+        if (response.ok) {
+            alert('UPI ID updated successfully!');
+        } else {
+            alert('Failed to update UPI ID.');
+        }
+    } catch (error) {
+        console.error('Error updating UPI ID:', error);
+        alert('An error occurred. Please try again.');
+    }
+};
 
   const handleSearch = async (query) => {
     try {
@@ -135,9 +156,29 @@ const Sidebar = () => {
         <div className="flex mb-2 pb-4 items-center gap-3 pl-8 cursor-pointer">
             Cake Day: <span>{formattedDate}</span>
         </div>
-        {/* <div className="flex mb-2 pb-4 items-center gap-3 pl-8 cursor-pointer">
-            Your Upi ID: 'No upi id currently'
-        </div> */}
+          <div className="flex flex-col mb-2 pb-4 items-center gap-3 pl-8">
+          <span>Your UPI ID:</span>
+            {user.upi_id === 'upi_id' ? (
+                <div className="flex items-center mt-1">
+                    <input 
+                        type="text" 
+                        placeholder="Please Update Your UPI ID for Receiving Tips" 
+                        value={upiId}
+                        onChange={(e) => setUpiId(e.target.value)} // Update state on change
+                        className="border rounded px-2 w-full max-w-md h-10 text-black"
+                    />
+                    <button 
+                        onClick={updateUpiId} 
+                        className="ml-2 bg-blue-500 text-white rounded px-4 h-10"
+                    >
+                        Update
+                    </button>
+                </div>
+            ) : (
+                <span>{user.upi_id}</span>
+            )}
+          </div>
+
 
       </div>
     </div>
