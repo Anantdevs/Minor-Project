@@ -53,13 +53,19 @@ const Player = () => {
   const [selectedTip, setSelectedTip] = useState(null);
 
   const [upiId, setUpiId] = useState('');
+  // const [upiId, setUpiId] = useState("9718461428@pthdfc");
+
   const [message, setMessage] = useState('');
   const [amount, setAmount] = useState(0);
   const [showQrCode, setShowQrCode] = useState(false);
   const [enable,setEnable] = useState(false);
+  // const [enable,setEnable] = useState(true);
+
   const generateUri = () => {
     return `upi://pay?pa=${upiId}&pn=YourName&mc=1234&tid=transaction_id&am=${amount}&cu=INR&url=${message}`;
   };
+
+  
   useEffect(() => {
     const fetchUserData = async () => {
       if (!song.userId) {
@@ -76,6 +82,8 @@ const Player = () => {
         const userData = await response.json();
         if (userData.upi_id === 'upi_id') {
           setEnable(false);
+          // setEnable(true);
+
           setMessage('This feature is not enabled by the creator at this moment.');
         } else {
           setEnable(true);
@@ -89,7 +97,7 @@ const Player = () => {
     };
   
     fetchUserData();
-  }, [song.userId]);
+  }, [song]);
   
 
   const generateQR = () => {
@@ -220,76 +228,79 @@ const Player = () => {
       {song && (
         <div className={`${isExpanded ? 'fixed top-0 left-0 w-full h-full bg-black' : 'h-[10%] bg-black'} flex flex-col justify-between text-white px-4 transition-all duration-300`}>
           {isExpanded ? (
-            <div className="flex flex-col items-center justify-center h-full">
-              <img src={song.thumbnail ? song.thumbnail.url : "https://via.placeholder.com/150"} className="w-36 mb-4" alt="" />
-              <div className="text-center mb-4">
-                <p className="text-lg font-semibold">{song.title}</p>
-                <p className="text-sm">{song.description && song.description.slice(0, 30)}...</p>
-              </div>
-              <div className="flex flex-col items-center">
-                {song && song.audio && (
-                  <audio ref={audioRef} src={song.audio.url} autoPlay={isPlaying} />
-                )}
-                <div className="w-full flex items-center font-thin text-green-400">
+            <div className="flex flex-row items-center justify-between h-full px-72">
+              <div className="flex flex-col items-center justify-center h-full ">
+                <img src={song.thumbnail ? song.thumbnail.url : "https://via.placeholder.com/150"} className="w-36 mb-4" alt="" />
+                <div className="text-center mb-4">
+                  <p className="text-lg font-semibold">{song.title}</p>
+                  <p className="text-sm">{song.description && song.description.slice(0, 30)}...</p>
+                </div>
+                <div className="flex flex-col items-center">
+                  {song && song.audio && (
+                    <audio ref={audioRef} src={song.audio.url} autoPlay={isPlaying} />
+                  )}
+                  <div className="w-full flex items-center font-thin text-green-400">
+                    <input
+                      type="range"
+                      min={"0"}
+                      max={"100"}
+                      className="progress-bar w-[120px] md:w-[300px]"
+                      value={(progress / duration) * 100}
+                      onChange={handleProgressChange}
+                    />
+                  </div>
+                  <div className="flex justify-center items-center gap-4 mt-3">
+                    <span className="cursor-pointer" onClick={prevMusic}>
+                      <GrChapterPrevious />
+                    </span>
+                    <button className="bg-white text-black rounded-full p-2" onClick={handlePlayPause}>
+                      {isPlaying ? <FaPause /> : <FaPlay />}
+                    </button>
+                    <span className="cursor-pointer" onClick={nextMusic}>
+                      <GrChapterNext />
+                    </span>
+                  </div>
+                </div>
+
+                <TippingOptions onSelect={toggleTip} />
+
+
+
+                <div className="flex items-center gap-5 mt-4 mb-2">
                   <input
                     type="range"
+                    className="w-16 md:w-32"
                     min={"0"}
-                    max={"100"}
-                    className="progress-bar w-[120px] md:w-[300px]"
-                    value={(progress / duration) * 100}
-                    onChange={handleProgressChange}
+                    max={"1"}
+                    step={"0.01"}
+                    value={volume}
+                    onChange={handleVolumeChange}
                   />
-                </div>
-                <div className="flex justify-center items-center gap-4 mt-3">
-                  <span className="cursor-pointer" onClick={prevMusic}>
-                    <GrChapterPrevious />
-                  </span>
-                  <button className="bg-white text-black rounded-full p-2" onClick={handlePlayPause}>
-                    {isPlaying ? <FaPause /> : <FaPlay />}
-                  </button>
-                  <span className="cursor-pointer" onClick={nextMusic}>
-                    <GrChapterNext />
-                  </span>
+                  <div className="cursor-pointer" onClick={toggleExpand}>
+                    <FaCompress />
+                  </div>
+                  <div className="cursor-pointer" onClick={toggleLove}>
+                    <FaHeart className={`${isLoved ? 'text-red-500' : 'text-white'}`} />
+                  </div>
                 </div>
               </div>
-
-              <TippingOptions onSelect={toggleTip} />
-
-              <div className="flex flex-col items-start mt-4">
-                {enable && (
-                  <>
-                    <p>UPI Scanner for Your Creator</p>
-                    <QRCodeCanvas value={generateUri()} className="mt-2" />
-                    <input
-                      type="number"
-                      placeholder="Enter Amount"
-                      value={amount}
-                      onChange={(e) => setAmount(e.target.value)}
-                      className="border rounded px-2 w-full max-w-xs text-black mt-2"
-                    />
-                  </>
-                )}
-                {!enable && (
-                  <p className="mt-2">THIS FEATURE IS NOT ENABLED BY THE CREATOR</p>
-                )}
-              </div>
-
-              <div className="flex items-center gap-5 mt-4 mb-2">
-                <input
-                  type="range"
-                  className="w-16 md:w-32"
-                  min={"0"}
-                  max={"1"}
-                  step={"0.01"}
-                  value={volume}
-                  onChange={handleVolumeChange}
-                />
-                <div className="cursor-pointer" onClick={toggleExpand}>
-                  <FaCompress />
-                </div>
-                <div className="cursor-pointer" onClick={toggleLove}>
-                  <FaHeart className={`${isLoved ? 'text-red-500' : 'text-white'}`} />
-                </div>
+              <div className="flex flex-col items-start h-full justify-center ">
+                            {enable && (
+                              <div className="flex flex-col items-center justify-center gap-4 ">
+                                <p>UPI Scanner for Your Creator</p>
+                                <QRCodeCanvas value={generateUri()} size={245}/>
+                                <input
+                                  type="number"
+                                  placeholder="Enter Amount"
+                                  value={amount}
+                                  onChange={(e) => setAmount(e.target.value)}
+                                  className="border rounded px-2 w-full max-w-xs text-black mt-2"
+                                />
+                              </div>
+                            )}
+                            {!enable && (
+                              <p className="mt-2">THIS FEATURE IS NOT ENABLED BY THE CREATOR</p>
+                            )}
               </div>
             </div>
           ) : (
