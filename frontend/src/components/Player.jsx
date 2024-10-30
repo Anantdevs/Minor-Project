@@ -55,7 +55,6 @@ const Player = () => {
   const [selectedTip, setSelectedTip] = useState(null);
 
   const [upiId, setUpiId] = useState('');
-  // const [upiId, setUpiId] = useState("9718461428@pthdfc");
 
   const [message, setMessage] = useState('');
   const [amount, setAmount] = useState(0);
