@@ -32,7 +32,7 @@ const Player = () => {
     loadSong();
   }, [fetchSingleSong]);
 
-
+//added new qr code features
 
   const audioRef = useRef(null);
 
