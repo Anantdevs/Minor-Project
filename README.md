@@ -73,8 +73,8 @@ VITE_BACKEND_URL=http://localhost:5000
 	4.	Start the project:
 
 # Start the backend
-npm run build
-npm run dev
+	1.	npm run build
+	2.	npm run dev
 
 
 
